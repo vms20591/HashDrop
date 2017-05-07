@@ -1,18 +1,56 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>HashDrop</title>
-		<link rel="stylesheet" href="index.css">
-	</head>
-	<body>
-		<div class="container">
-			<header>
-				<h1>HashDrop</h1>
-        <h4>Drag and drop files and their corresponding hash sum to verify integrity.</h4>
-			</header>
-			<section class="main"></section>
-			<footer></footer>
-		</div>
-	</body>
+
+<head>
+    <meta charset="utf-8">
+    <title>HashDrop</title>
+    <!-- Custom stylesheets import -->
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>HashDrop</h1>
+            <h4>Easily verify integrity of a file.</h4>
+        </header>
+        <section class="main">
+            <!-->
+            Section for source file
+            </!-->
+            <label>Source File: 
+          		<input type="text" id="sourceFile" placeholder="Add a file or its path" required/>
+        		</label>
+            <button type="button" id="chooseSourceBtn">Choose File</button>
+            <br/><br/>
+
+            <!-->
+            Section for checksum file
+            </!-->
+            <label>Checksum: 
+          		<input type="text" id="checksumFile" placeholder="Add a file, its path or checksum" required/>
+        		</label>
+            <button type="button" id="chooseChecksumBtn">Choose File</button>
+            <br/><br/>
+
+            <!-->
+            Section for hash type
+            </!-->
+            <label>Hash Type: 
+							<select id="hashTypes" required>
+							</select>
+						</label>
+            <br/><br/>
+
+            <!-->
+            Section for verifying integrity
+            </!-->
+            <button type="button" id="checkHashBtn">Verify Integrity</button>
+        </section>
+        <footer></footer>
+    </div>
+    <!-- Custom scripts import -->
+    <script src="hashdrop.js"></script>
+</body>
+
 </html>

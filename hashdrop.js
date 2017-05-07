@@ -12,6 +12,9 @@ var chooseChecksumBtn = document.getElementById('chooseChecksumBtn');
 var checkHashBtn = document.getElementById('checkHashBtn');
 var hashTypes = document.getElementById('hashTypes');
 var flashMessage = document.getElementById('flash-message');
+var dialogBox = document.getElementById('dialog');
+var loading = document.getElementById('loading');
+var overlay = document.getElementById('overlay');
 
 //Loading a list of available hashes onto <select> tag
 window.onload = function() {
@@ -81,7 +84,9 @@ checkHashBtn.addEventListener('click', function() {
         try {
             //Read from source file only if it exists
             if (fs.existsSync(sourceFilePath)) {
-                sourceFd = fs.readFileSync(sourceFilePath, 'utf8');
+                //Create a stream instead of reading file
+                //Suitable for large files
+                sourceFd = fs.createReadStream(sourceFilePath);
             } else {
                 logToConsoleAndAlert(sourceFilePath + ' doesn\'t exist');
                 return;
@@ -97,22 +102,46 @@ checkHashBtn.addEventListener('click', function() {
             }
 
             //Proceed only if some value is present in the file descriptors
-            if (typeof(sourceFd) === 'string' && typeof(checksumFd) === 'string') {
+            if (sourceFd != null && typeof(checksumFd) === 'string') {
                 //Create a hash from the selected hash value
                 var hash = crypt.createHash(hashTypes.value || 'md5');
+                var sourceHash = null;
+                var checksumHash = null;
+
+                //Show the overloay and dialog box
+                dialogBox.classList.toggle('hide');
+                overlay.classList.toggle('hide');
+
+                //Start animating the loading text
+                var interval = setInterval(function() {
+                    loading.classList.toggle('show');
+                }, 500);
 
                 //Get the hash for source file
-                var sourceHash = hash.update(sourceFd).digest('hex');
+                sourceFd.on('data', function(data) {
+                    hash.update(data, 'utf8');
+                }).on('end', function() {
+                    //Hide the dialog box and overlay
+                    dialogBox.classList.toggle('hide');
+                    overlay.classList.toggle('hide');
 
-                //Store the checksum hash
-                var checksumHash = checksumFd.trim();
+                    //Clear animation
+                    clearInterval(interval);
+                    interval = null;
 
-                //Check if the hash matches
-                if (sourceHash === checksumHash) {
-                    logToConsoleAndAlert(null, 'The file is intact');
-                } else {
-                    logToConsoleAndAlert('Oops! Seems the file has been tampered!');
-                }
+                    //Digest the hash 
+                    sourceHash = hash.digest('hex');
+
+                    //Store the checksum hash
+                    checksumHash = checksumFd.trim();
+
+                    //Check if the hash matches
+                    if (sourceHash === checksumHash) {
+                        logToConsoleAndAlert(null, 'The file is intact');
+                    } else {
+                        logToConsoleAndAlert('Oops! Seems the file has been tampered!');
+                    }
+                });
             } else {
                 logToConsoleAndAlert('Some weird error occured!');
             }

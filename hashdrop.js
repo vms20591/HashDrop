@@ -11,6 +11,7 @@ var chooseSourceBtn = document.getElementById('chooseSourceBtn');
 var chooseChecksumBtn = document.getElementById('chooseChecksumBtn');
 var checkHashBtn = document.getElementById('checkHashBtn');
 var hashTypes = document.getElementById('hashTypes');
+var flashMessage = document.getElementById('flash-message');
 
 //Loading a list of available hashes onto <select> tag
 window.onload = function() {
@@ -82,7 +83,7 @@ checkHashBtn.addEventListener('click', function() {
             if (fs.existsSync(sourceFilePath)) {
                 sourceFd = fs.readFileSync(sourceFilePath, 'utf8');
             } else {
-                logToConsoleAndAlert(null, sourceFilePath + ' doesn\'t exist');
+                logToConsoleAndAlert(sourceFilePath + ' doesn\'t exist');
                 return;
             }
 
@@ -110,26 +111,48 @@ checkHashBtn.addEventListener('click', function() {
                 if (sourceHash === checksumHash) {
                     logToConsoleAndAlert(null, 'The file is intact');
                 } else {
-                    logToConsoleAndAlert(null, 'Oops! Seems the file has been tampered!');
+                    logToConsoleAndAlert('Oops! Seems the file has been tampered!');
                 }
             } else {
-                logToConsoleAndAlert(null, 'Some weird error occured!');
+                logToConsoleAndAlert('Some weird error occured!');
             }
         } catch (error) {
             logToConsoleAndAlert(error);
         }
     } else {
-        logToConsoleAndAlert(null, 'Can\'t verify integrity without both files');
+        logToConsoleAndAlert('Can\'t verify integrity without both files');
     }
 });
 
 //Logging to both console and window
 var logToConsoleAndAlert = function(error, message) {
     if (error) {
-        alert('Error occured reading file');
         console.log(error);
+        flashTheMessage(error.message || error, true);
     } else {
-        alert(message);
         console.log(message);
+        flashTheMessage(message, false);
     }
+};
+
+//Flash message onto screen instead of alert
+var flashTheMessage = function(message, isError) {
+    //Show flash message after a small delay
+    setTimeout(function() {
+        var color = '#2AB33B';
+
+        if (isError) {
+            color = '#FF1C1C';
+        }
+
+        flashMessage.innerHTML = message;
+        flashMessage.style.border = '2px solid ' + color;
+        flashMessage.style.color = color;
+        flashMessage.style.visibility = 'visible';
+    }, 300);
+
+    //Hide flash message after sometime
+    setTimeout(function() {
+        flashMessage.style.visibility = 'hidden';
+    }, 3000);
 };
